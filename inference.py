@@ -6,9 +6,22 @@ import requests
 from openai import OpenAI
 
 # Strictly use only hackathon-provided environment variables
-API_BASE_URL = os.environ["API_BASE_URL"]
-API_KEY = os.environ["API_KEY"]
-MODEL_NAME = os.environ["MODEL_NAME"]
+
+try:
+    API_BASE_URL = os.environ["API_BASE_URL"]
+except KeyError:
+    print("[ERROR] API_BASE_URL environment variable is not set.", flush=True)
+    exit(1)
+try:
+    API_KEY = os.environ["API_KEY"]
+except KeyError:
+    print("[ERROR] API_KEY environment variable is not set.", flush=True)
+    exit(1)
+try:
+    MODEL_NAME = os.environ["MODEL_NAME"]
+except KeyError:
+    print("[ERROR] MODEL_NAME environment variable is not set.", flush=True)
+    exit(1)
 BASE_URL = os.environ["OPENENV_BASE_URL"] if "OPENENV_BASE_URL" in os.environ else "https://singhalyash-csv-cleaning-openenv.hf.space"
 SEED = int(os.environ.get("SEED", "7"))
 
