@@ -1,10 +1,11 @@
 ---
 title: CSV Cleaning OpenEnv
-emoji: 🧹
+emoji: "🧹"
 colorFrom: blue
 colorTo: green
 sdk: docker
-app_file: server/app.py
+app_file: api/main.py
+pinned: false
 ---
 # CSV Cleaning OpenEnv
 
@@ -12,9 +13,9 @@ A real-world OpenEnv environment that simulates data cleaning on messy CSV files
 
 ## What this environment models
 
-Data cleaning is a common, real-world task for analysts and ML engineers. This environment exposes a compact but realistic CSV dataset with multiple issue types, and grades agents by measurable improvements toward a clean dataset.
 
 ## OpenEnv compliance
+---
 
 - Typed Pydantic models for `Observation`, `Action`, and `Reward`.
 - `reset`, `step`, and `state` endpoints.
@@ -22,7 +23,6 @@ Data cleaning is a common, real-world task for analysts and ML engineers. This e
 
 ## Tasks
 
-| Task ID | Difficulty | Objective | Max Steps |
 | --- | --- | --- | --- |
 | `csv_easy` | easy | Fix date formats and normalize categories | 10 |
 | `csv_medium` | medium | Fix dates, normalize categories, remove outliers | 12 |
