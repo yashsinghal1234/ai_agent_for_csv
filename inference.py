@@ -6,55 +6,13 @@ from typing import Dict, Optional
 import requests
 from openai import OpenAI
 
-# ── Debug: print env vars so hackathon logs show what was injected ────────────
-print("[DEBUG] ENV: API_BASE_URL=" + os.environ.get("API_BASE_URL", "NOT SET"), flush=True)
-print("[DEBUG] ENV: MODEL_NAME=" + os.environ.get("MODEL_NAME", "NOT SET"), flush=True)
-print("[DEBUG] ENV: HF_TOKEN=" + ("SET" if os.environ.get("HF_TOKEN") else "NOT SET"), flush=True)
-print("[DEBUG] ENV: OPENENV_BASE_URL=" + os.environ.get("OPENENV_BASE_URL", "NOT SET"), flush=True)
-
-# ── Environment variables ─────────────────────────────────────────────────────
-
-API_BASE_URL = os.environ.get("API_BASE_URL", "").rstrip("/")
-if not API_BASE_URL:
-    print("[ERROR] API_BASE_URL environment variable is not set.", flush=True)
-    sys.exit(1)
-
-API_KEY = (
-    os.environ.get("HF_TOKEN")
-    or os.environ.get("API_KEY")
-    or os.environ.get("OPENAI_API_KEY")
-    or ""
-)
-if not API_KEY:
-    print("[ERROR] HF_TOKEN environment variable is not set.", flush=True)
-    sys.exit(1)
-
-MODEL_NAME = os.environ.get("MODEL_NAME", "")
-if not MODEL_NAME:
-    print("[ERROR] MODEL_NAME environment variable is not set.", flush=True)
-    sys.exit(1)
+# ── Environment variables (as required by hackathon) ──────────────────────────
+API_BASE_URL = os.getenv("API_BASE_URL", "<your-active-api-base-url>")
+MODEL_NAME = os.getenv("MODEL_NAME", "<your-active-model-name>")
+HF_TOKEN = os.getenv("HF_TOKEN")
 
 BASE_URL = os.environ.get("OPENENV_BASE_URL", "https://singhalyash-csv-cleaning-openenv.hf.space").rstrip("/")
 SEED = int(os.environ.get("SEED", "7"))
-
-print(f"[DEBUG] Using BASE_URL: {BASE_URL}", flush=True)
-print(f"[DEBUG] Using MODEL: {MODEL_NAME}", flush=True)
-
-# ── Wait for server to be ready ───────────────────────────────────────────────
-
-def wait_for_server(url: str, timeout: int = 60) -> bool:
-    print(f"[DEBUG] Waiting for server at {url} ...", flush=True)
-    for i in range(timeout):
-        try:
-            resp = requests.get(f"{url}/tasks", timeout=5)
-            if resp.status_code == 200:
-                print(f"[DEBUG] Server ready after {i}s", flush=True)
-                return True
-        except Exception:
-            pass
-        time.sleep(1)
-    print(f"[ERROR] Server not ready after {timeout}s", flush=True)
-    return False
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -100,7 +58,7 @@ def choose_action_from_issue(issue: dict) -> dict:
 
 
 def build_llm_client() -> OpenAI:
-    return OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+    return OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
 
 def llm_action(client: OpenAI, observation: dict) -> dict:
@@ -193,8 +151,6 @@ def run_task(task_id: str, client: OpenAI = None) -> Dict:
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 def main() -> None:
-    wait_for_server(BASE_URL)
-
     result = safe_get(f"{BASE_URL}/tasks")
     if result is None:
         print("[ERROR] Could not fetch tasks from environment.", flush=True)
