@@ -1,19 +1,16 @@
+
 import json
 import os
 from typing import Dict
-
 import requests
-from dotenv import load_dotenv
 from openai import OpenAI
 
-load_dotenv()
-
-BASE_URL = os.getenv("OPENENV_BASE_URL", "https://singhalyash-csv-cleaning-openenv.hf.space")
-API_BASE_URL = os.getenv("API_BASE_URL")
-MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
-HF_TOKEN = os.getenv("HF_TOKEN")
-USE_LLM = os.getenv("USE_LLM", "0") == "1"
-SEED = int(os.getenv("SEED", "7"))
+# Strictly use only hackathon-provided environment variables
+API_BASE_URL = os.environ["API_BASE_URL"]
+API_KEY = os.environ["API_KEY"]
+MODEL_NAME = os.environ["MODEL_NAME"]
+BASE_URL = os.environ["OPENENV_BASE_URL"] if "OPENENV_BASE_URL" in os.environ else "https://singhalyash-csv-cleaning-openenv.hf.space"
+SEED = int(os.environ.get("SEED", "7"))
 
 
 def log_event(tag: str, payload: Dict) -> None:
@@ -33,10 +30,9 @@ def choose_action_from_issue(issue: dict) -> dict:
     return {"type": "noop"}
 
 
+
 def build_llm_client() -> OpenAI:
-    if not API_BASE_URL or not HF_TOKEN:
-        raise RuntimeError("API_BASE_URL and HF_TOKEN must be set when USE_LLM=1.")
-    return OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+    return OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
 
 
 def llm_action(client: OpenAI, observation: dict) -> dict:
@@ -130,8 +126,7 @@ def run_task(task_id: str, client: OpenAI = None) -> Dict:
 
 def main() -> None:
     tasks = requests.get(f"{BASE_URL}/tasks").json()["tasks"]
-    client = build_llm_client() if USE_LLM else None
-
+    client = build_llm_client()
     for task in tasks:
         run_task(task["task_id"], client=client)
 
