@@ -1,3 +1,12 @@
+---
+title: CSV Cleaning OpenEnv
+emoji: 🧹
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_file: server/app.py
+---
+
 # CSV Cleaning OpenEnv
 
 A real-world OpenEnv environment that simulates data cleaning on messy CSV files. Agents must fix dates, normalize categorical labels, and remove numeric outliers via the standard `reset()`, `step()`, and `state()` API.
@@ -96,12 +105,3 @@ docker run -p 7860:7860 csv-cleaning-openenv
 ## HF Spaces
 
 This repository is ready for a containerized Space. Ensure the required environment variables are configured in the Space settings.
-
----
-title: CSV Cleaning OpenEnv
-emoji: 🧹
-colorFrom: blue
-colorTo: green
-sdk: docker
-app_file: server/app.py
----
