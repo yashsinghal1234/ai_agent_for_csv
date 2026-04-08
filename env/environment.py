@@ -42,13 +42,13 @@ class CSVEnvironment:
         if self.done:
             return StepResult(
                 observation=self._get_observation(),
-                reward=0.0,
+                reward=0.001,
                 done=True,
                 info={
                     "task_id": self.task.task_id,
                     "score": self._grade(),
                     "reason": "episode_done",
-                    "reward_detail": Reward(value=0.0, components={"progress": 0.0, "penalty": 0.0}).dict(),
+                    "reward_detail": Reward(value=0.001, components={"progress": 0.0, "penalty": 0.0}).dict(),
                 },
             )
 
