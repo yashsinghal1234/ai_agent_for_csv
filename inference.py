@@ -1,4 +1,3 @@
-
 import json
 import os
 from typing import Dict
@@ -12,17 +11,19 @@ try:
 except KeyError:
     print("[ERROR] API_BASE_URL environment variable is not set.", flush=True)
     exit(1)
-try:
-    API_KEY = os.environ["API_KEY"]
-except KeyError:
-    print("[ERROR] API_KEY environment variable is not set.", flush=True)
+
+API_KEY = os.environ.get("HF_TOKEN") or os.environ.get("API_KEY") or os.environ.get("OPENAI_API_KEY")
+if not API_KEY:
+    print("[ERROR] HF_TOKEN environment variable is not set.", flush=True)
     exit(1)
+
 try:
     MODEL_NAME = os.environ["MODEL_NAME"]
 except KeyError:
     print("[ERROR] MODEL_NAME environment variable is not set.", flush=True)
     exit(1)
-BASE_URL = os.environ["OPENENV_BASE_URL"] if "OPENENV_BASE_URL" in os.environ else "https://singhalyash-csv-cleaning-openenv.hf.space"
+
+BASE_URL = os.environ.get("OPENENV_BASE_URL", "https://singhalyash-csv-cleaning-openenv.hf.space")
 SEED = int(os.environ.get("SEED", "7"))
 
 
@@ -41,7 +42,6 @@ def choose_action_from_issue(issue: dict) -> dict:
         return {"type": "remove_outlier", "row": issue["row"]}
 
     return {"type": "noop"}
-
 
 
 def build_llm_client() -> OpenAI:
@@ -78,11 +78,11 @@ def llm_action(client: OpenAI, observation: dict) -> dict:
 
 
 def run_task(task_id: str, client: OpenAI = None) -> Dict:
-
     resp = requests.post(f"{BASE_URL}/reset", json={"task_id": task_id, "seed": SEED})
     if resp.status_code != 200:
         print(f"[ERROR] /reset failed for task {task_id}: {resp.status_code} {resp.text}", flush=True)
-        return
+        return {"task_id": task_id, "score": 0.0, "total_reward": 0.0, "steps": 0}
+
     observation = resp.json()
     episode_id = f"{task_id}-{SEED}"
     log_event("START", {"task_id": task_id, "episode_id": episode_id, "seed": SEED})
