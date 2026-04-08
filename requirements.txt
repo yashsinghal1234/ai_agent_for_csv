@@ -6,3 +6,4 @@ openai
 python-dotenv
 numpy
 requests
+python-multipart
