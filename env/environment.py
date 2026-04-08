@@ -63,7 +63,7 @@ class CSVEnvironment:
         self.step_count += 1
         self.done = after_score >= 0.998 or self.step_count >= self.task.max_steps
 
-        reward_detail = Reward(value=reward_value, components={"progress": progress, "penalty": penalty})
+        reward_detail = Reward(value=reward_value, components={"progress": float(max(0.0, progress)), "penalty": float(penalty)})
         info = {
             "task_id": self.task.task_id,
             "score": after_score,
@@ -108,7 +108,7 @@ class CSVEnvironment:
 
         remaining = self._count_issues()
         score = 1.0 - (remaining / float(self._baseline_issue_count))
-        return float(max(0.001, min(0.998, score)))
+        return float(max(0.002, min(0.998, score)))
 
     def detect_issues(self) -> list:
         issues = []
