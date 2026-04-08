@@ -96,3 +96,12 @@ docker run -p 7860:7860 csv-cleaning-openenv
 ## HF Spaces
 
 This repository is ready for a containerized Space. Ensure the required environment variables are configured in the Space settings.
+
+---
+title: CSV Cleaning OpenEnv
+emoji: 🧹
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_file: server/app.py
+---
