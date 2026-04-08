@@ -66,7 +66,7 @@ def run_agent() -> None:
         print(f"Step {step}: {action}")
 
         response = requests.post(f"{BASE_URL}/step", json=action).json()
-        reward_value = float(max(0.001, min(0.999, response["reward"])))
+        reward_value = float(max(0.06, min(0.94, response["reward"])))
         print("Reward:", reward_value)
         observation = response["observation"]
 
