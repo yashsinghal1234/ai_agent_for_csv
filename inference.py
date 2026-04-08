@@ -144,5 +144,11 @@ def main() -> None:
         run_task(task["task_id"], client=client)
 
 
+import sys
+
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print(f"[ERROR] Unhandled exception: {e}", flush=True)
+        sys.exit(1)
