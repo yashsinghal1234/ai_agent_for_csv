@@ -70,6 +70,7 @@ def tasks() -> TaskListResponse:
     return TaskListResponse(tasks=list_tasks(), default_task_id=DEFAULT_TASK_ID)
 
 
+<<<<<<< HEAD
 
 # Accept optional body for OpenEnv compliance
 @app.post("/reset", response_model=Observation)
@@ -79,6 +80,14 @@ def reset(request: Optional[ResetRequest] = Body(None)) -> Observation:
     if task_id not in TASKS:
         raise HTTPException(status_code=400, detail=f"Unknown task_id '{task_id}'.")
     return env.reset(task_id=task_id, seed=seed)
+=======
+@app.post("/reset", response_model=Observation)
+def reset(request: ResetRequest) -> Observation:
+    task_id = request.task_id or DEFAULT_TASK_ID
+    if task_id not in TASKS:
+        raise HTTPException(status_code=400, detail=f"Unknown task_id '{task_id}'.")
+    return env.reset(task_id=task_id, seed=request.seed)
+>>>>>>> 4328f44c9d6232bfecf82f1767cd9a7b9395f39d
 
 
 @app.get("/reset", response_model=Observation)
