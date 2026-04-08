@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Body
 
 from env.environment import CSVEnvironment
 from env.models import Action, Observation, ResetRequest, StepResult, TaskListResponse
@@ -70,12 +70,15 @@ def tasks() -> TaskListResponse:
     return TaskListResponse(tasks=list_tasks(), default_task_id=DEFAULT_TASK_ID)
 
 
+
+# Accept optional body for OpenEnv compliance
 @app.post("/reset", response_model=Observation)
-def reset(request: ResetRequest) -> Observation:
-    task_id = request.task_id or DEFAULT_TASK_ID
+def reset(request: Optional[ResetRequest] = Body(None)) -> Observation:
+    task_id = request.task_id if request and request.task_id else DEFAULT_TASK_ID
+    seed = request.seed if request else None
     if task_id not in TASKS:
         raise HTTPException(status_code=400, detail=f"Unknown task_id '{task_id}'.")
-    return env.reset(task_id=task_id, seed=request.seed)
+    return env.reset(task_id=task_id, seed=seed)
 
 
 @app.get("/reset", response_model=Observation)
