@@ -28,7 +28,7 @@ if not MODEL_NAME:
     print("[ERROR] MODEL_NAME environment variable is not set.", flush=True)
     sys.exit(1)
 
-BASE_URL = os.environ.get("OPENENV_BASE_URL", "http://localhost:7860").rstrip("/")
+BASE_URL = os.environ.get("OPENENV_BASE_URL", "https://singhalyash-csv-cleaning-openenv.hf.space").rstrip("/")
 SEED = int(os.environ.get("SEED", "7"))
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
