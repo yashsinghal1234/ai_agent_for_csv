@@ -79,5 +79,5 @@ observation_space:
 
 reward:
   type: number
-  minimum: 0.0
-  maximum: 1.0
+  exclusive_minimum: 0.0
+  exclusive_maximum: 1.0
