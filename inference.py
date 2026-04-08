@@ -117,9 +117,9 @@ def run_task(task_id: str, client: OpenAI = None) -> Dict:
                 break
 
         raw_reward = response.get("reward", 0.0)
-        reward_value = round(float(raw_reward), 2)
+        reward_value = min(0.99, max(0.01, round(float(raw_reward), 2)))
         raw_score = response.get("info", {}).get("score", final_score)
-        final_score = round(float(raw_score), 2)
+        final_score = min(0.99, max(0.01, round(float(raw_score), 2)))
         done = response.get("done", False)
         steps = step + 1
         rewards.append(reward_value)
@@ -132,7 +132,7 @@ def run_task(task_id: str, client: OpenAI = None) -> Dict:
             break
 
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
-    print(f"[END] success={str(done).lower()} steps={steps} rewards={rewards_str}", flush=True)
+    print(f"[END] success={str(done).lower()} steps={steps} score={final_score:.2f} rewards={rewards_str}", flush=True)
 
     return {"task_id": task_id, "score": final_score, "total_reward": sum(rewards), "steps": steps}
 
