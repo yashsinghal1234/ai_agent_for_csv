@@ -16,10 +16,6 @@ SEED = int(os.environ.get("SEED", "7"))
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def log_event(tag: str, payload: Dict) -> None:
-    print(f"[{tag}] {json.dumps(payload, separators=(',', ':'))}", flush=True)
-
-
 def safe_post(url: str, payload: dict, retries: int = 3) -> Optional[dict]:
     for attempt in range(retries):
         try:
@@ -96,14 +92,15 @@ def run_task(task_id: str, client: OpenAI = None) -> Dict:
     observation = safe_post(f"{BASE_URL}/reset", {"task_id": task_id, "seed": SEED})
     if observation is None:
         print(f"[ERROR] /reset failed for task {task_id}", flush=True)
-        return {"task_id": task_id, "score": 0.06, "total_reward": 0.06, "steps": 0}
+        return {"task_id": task_id, "score": 0.01, "total_reward": 0.01, "steps": 0}
 
     episode_id = f"{task_id}-{SEED}"
-    log_event("START", {"task_id": task_id, "episode_id": episode_id, "seed": SEED})
+    print(f"[START] task={task_id} env={task_id} model={MODEL_NAME}", flush=True)
 
-    total_reward = 0.06
-    final_score = 0.06
+    rewards = []
+    final_score = 0.01
     steps = 0
+    done = False
 
     for step in range(observation.get("max_steps", 10)):
         issues = observation.get("issues", [])
@@ -119,36 +116,25 @@ def run_task(task_id: str, client: OpenAI = None) -> Dict:
             if response is None:
                 break
 
-        reward_value = float(max(0.06, min(0.94, response.get("reward", 0.06))))
-        total_reward = float(max(0.06, min(0.94, total_reward + reward_value)))
-        final_score = float(max(0.06, min(0.94, response.get("info", {}).get("score", final_score))))
+        raw_reward = response.get("reward", 0.0)
+        reward_value = round(float(raw_reward), 2)
+        raw_score = response.get("info", {}).get("score", final_score)
+        final_score = round(float(raw_score), 2)
+        done = response.get("done", False)
         steps = step + 1
+        rewards.append(reward_value)
 
-        log_event("STEP", {
-            "task_id": task_id,
-            "episode_id": episode_id,
-            "step": step,
-            "action": action,
-            "reward": reward_value,
-            "done": response.get("done", False),
-            "score": final_score,
-        })
+        action_str = json.dumps(action)
+        print(f"[STEP] step={steps} action={action_str} reward={reward_value:.2f} done={str(done).lower()} error=null", flush=True)
 
         observation = response.get("observation", observation)
-        if response.get("done", False):
+        if done:
             break
 
-    safe_score = float(max(0.06, min(0.94, final_score)))
-    safe_reward = float(max(0.06, min(0.94, total_reward)))
-    log_event("END", {
-        "task_id": task_id,
-        "episode_id": episode_id,
-        "steps": steps,
-        "total_reward": safe_reward,
-        "final_score": safe_score,
-    })
+    rewards_str = ",".join(f"{r:.2f}" for r in rewards)
+    print(f"[END] success={str(done).lower()} steps={steps} rewards={rewards_str}", flush=True)
 
-    return {"task_id": task_id, "score": safe_score, "total_reward": safe_reward, "steps": steps}
+    return {"task_id": task_id, "score": final_score, "total_reward": sum(rewards), "steps": steps}
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
