@@ -104,11 +104,11 @@ class CSVEnvironment:
 
     def _grade(self) -> float:
         if self._baseline_issue_count <= 0:
-            return 1.0
+            return 0.999
 
         remaining = self._count_issues()
         score = 1.0 - (remaining / float(self._baseline_issue_count))
-        return float(max(0.0, min(1.0, score)))
+        return float(max(0.001, min(0.999, score)))
 
     def detect_issues(self) -> list:
         issues = []
