@@ -58,7 +58,7 @@ class CSVEnvironment:
 
         progress = max(0.0, after_score - before_score)
         penalty = 0.1 if not valid_action else 0.0
-        reward_value = max(0.0, min(1.0, progress - penalty))
+        reward_value = float(max(0.001, min(0.999, progress - penalty)))
 
         self.step_count += 1
         self.done = after_score >= 0.999 or self.step_count >= self.task.max_steps
