@@ -8,7 +8,7 @@ from openai import OpenAI
 
 load_dotenv()
 
-BASE_URL = os.getenv("OPENENV_BASE_URL", "http://127.0.0.1:7860")
+BASE_URL = os.getenv("OPENENV_BASE_URL", "https://singhalyash-csv-cleaning-openenv.hf.space")
 API_BASE_URL = os.getenv("API_BASE_URL")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
 HF_TOKEN = os.getenv("HF_TOKEN")
@@ -69,9 +69,32 @@ def llm_action(client: OpenAI, observation: dict) -> dict:
 
 
 def run_task(task_id: str, client: OpenAI = None) -> Dict:
-    observation = requests.post(f"{BASE_URL}/reset", json={"task_id": task_id, "seed": SEED}).json()
+
+    resp = requests.post(f"{BASE_URL}/reset", json={"task_id": task_id, "seed": SEED})
+    if resp.status_code != 200:
+        print(f"[ERROR] /reset failed for task {task_id}: {resp.status_code} {resp.text}", flush=True)
+        return
+    observation = resp.json()
     episode_id = f"{task_id}-{SEED}"
     log_event("START", {"task_id": task_id, "episode_id": episode_id, "seed": SEED})
+
+    total_reward = 0.0
+    final_score = 0.0
+    steps = 0
+
+    for step in range(observation["max_steps"]):
+        if observation["issues"]:
+            if client:
+                action = llm_action(client, observation)
+            else:
+                action = choose_action_from_issue(observation["issues"][0])
+        else:
+            action = {"type": "noop"}
+
+        response = requests.post(f"{BASE_URL}/step", json=action).json()
+        reward_value = response["reward"]
+        total_reward += reward_value
+        final_score = response["info"].get("score", final_score)
         steps = step + 1
 
         log_event(
