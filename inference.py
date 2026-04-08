@@ -72,24 +72,6 @@ def run_task(task_id: str, client: OpenAI = None) -> Dict:
     observation = requests.post(f"{BASE_URL}/reset", json={"task_id": task_id, "seed": SEED}).json()
     episode_id = f"{task_id}-{SEED}"
     log_event("START", {"task_id": task_id, "episode_id": episode_id, "seed": SEED})
-
-    total_reward = 0.0
-    final_score = 0.0
-    steps = 0
-
-    for step in range(observation["max_steps"]):
-        if observation["issues"]:
-            if client:
-                action = llm_action(client, observation)
-            else:
-                action = choose_action_from_issue(observation["issues"][0])
-        else:
-            action = {"type": "noop"}
-
-        response = requests.post(f"{BASE_URL}/step", json=action).json()
-        reward_value = response["reward"]
-        total_reward += reward_value
-        final_score = response["info"].get("score", final_score)
         steps = step + 1
 
         log_event(
