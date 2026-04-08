@@ -1,0 +1,21 @@
+[project]
+name = "csv-cleaning-openenv"
+version = "0.1.0"
+description = "A real-world OpenEnv environment for CSV cleaning."
+authors = [
+    { name="Your Name", email="your@email.com" }
+]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pandas",
+    "pydantic",
+    "openai",
+    "python-dotenv",
+    "numpy",
+    "requests",
+    "openenv-core>=0.2.0"
+]
+[project.scripts]
+server = "server.app:main"
+requires-python = ">=3.8"

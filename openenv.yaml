@@ -1,0 +1,83 @@
+name: csv-cleaning-openenv
+version: 0.1.0
+description: Real-world CSV cleaning environment for dates, categories, and outliers.
+license: MIT
+language: python
+entrypoint: api.main:app
+api:
+  reset: /reset
+  step: /step
+  state: /state
+  tasks: /tasks
+
+metadata:
+  tags:
+    - openenv
+    - data-cleaning
+    - csv
+
+settings:
+  default_task_id: csv_easy
+
+tasks:
+  - id: csv_easy
+    name: CSV Cleaning - Dates and Categories
+    difficulty: easy
+    max_steps: 10
+    description: Fix date formats and normalize category labels.
+  - id: csv_medium
+    name: CSV Cleaning - Full Pass
+    difficulty: medium
+    max_steps: 12
+    description: Fix dates, normalize categories, and remove value outliers.
+  - id: csv_hard
+    name: CSV Cleaning - Tight Budget
+    difficulty: hard
+    max_steps: 8
+    description: Full cleaning with fewer allowed steps.
+
+action_space:
+  type: object
+  fields:
+    type:
+      type: enum
+      values: [fix_date, standardize_category, remove_outlier, noop]
+    row:
+      type: integer
+      nullable: true
+    col:
+      type: string
+      nullable: true
+
+observation_space:
+  type: object
+  fields:
+    preview:
+      type: object
+      description: Head rows as column->list mapping.
+    issues:
+      type: array
+      items:
+        type: object
+        fields:
+          type:
+            type: enum
+            values: [date_issue, category_issue, outlier]
+          row:
+            type: integer
+          col:
+            type: string
+            nullable: true
+    stats:
+      type: object
+    task_id:
+      type: string
+    step:
+      type: integer
+    max_steps:
+      type: integer
+
+reward:
+  type: number
+  minimum: 0.0
+  maximum: 1.0
