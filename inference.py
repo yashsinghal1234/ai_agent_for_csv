@@ -6,7 +6,13 @@ from typing import Dict, Optional
 import requests
 from openai import OpenAI
 
-# ── Environment variables ────────────────────────────────────────────────────
+# ── Debug: print env vars so hackathon logs show what was injected ────────────
+print("[DEBUG] ENV: API_BASE_URL=" + os.environ.get("API_BASE_URL", "NOT SET"), flush=True)
+print("[DEBUG] ENV: MODEL_NAME=" + os.environ.get("MODEL_NAME", "NOT SET"), flush=True)
+print("[DEBUG] ENV: HF_TOKEN=" + ("SET" if os.environ.get("HF_TOKEN") else "NOT SET"), flush=True)
+print("[DEBUG] ENV: OPENENV_BASE_URL=" + os.environ.get("OPENENV_BASE_URL", "NOT SET"), flush=True)
+
+# ── Environment variables ─────────────────────────────────────────────────────
 
 API_BASE_URL = os.environ.get("API_BASE_URL", "").rstrip("/")
 if not API_BASE_URL:
@@ -31,7 +37,26 @@ if not MODEL_NAME:
 BASE_URL = os.environ.get("OPENENV_BASE_URL", "https://singhalyash-csv-cleaning-openenv.hf.space").rstrip("/")
 SEED = int(os.environ.get("SEED", "7"))
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
+print(f"[DEBUG] Using BASE_URL: {BASE_URL}", flush=True)
+print(f"[DEBUG] Using MODEL: {MODEL_NAME}", flush=True)
+
+# ── Wait for server to be ready ───────────────────────────────────────────────
+
+def wait_for_server(url: str, timeout: int = 60) -> bool:
+    print(f"[DEBUG] Waiting for server at {url} ...", flush=True)
+    for i in range(timeout):
+        try:
+            resp = requests.get(f"{url}/tasks", timeout=5)
+            if resp.status_code == 200:
+                print(f"[DEBUG] Server ready after {i}s", flush=True)
+                return True
+        except Exception:
+            pass
+        time.sleep(1)
+    print(f"[ERROR] Server not ready after {timeout}s", flush=True)
+    return False
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
 def log_event(tag: str, payload: Dict) -> None:
     print(f"[{tag}] {json.dumps(payload, separators=(',', ':'))}", flush=True)
@@ -62,7 +87,7 @@ def safe_get(url: str, retries: int = 3) -> Optional[dict]:
             time.sleep(2)
     return None
 
-# ── Agent logic ──────────────────────────────────────────────────────────────
+# ── Agent logic ───────────────────────────────────────────────────────────────
 
 def choose_action_from_issue(issue: dict) -> dict:
     if issue["type"] == "date_issue":
@@ -107,7 +132,7 @@ def llm_action(client: OpenAI, observation: dict) -> dict:
             return choose_action_from_issue(observation["issues"][0])
         return {"type": "noop"}
 
-# ── Task runner ──────────────────────────────────────────────────────────────
+# ── Task runner ───────────────────────────────────────────────────────────────
 
 def run_task(task_id: str, client: OpenAI = None) -> Dict:
     observation = safe_post(f"{BASE_URL}/reset", {"task_id": task_id, "seed": SEED})
@@ -165,9 +190,11 @@ def run_task(task_id: str, client: OpenAI = None) -> Dict:
 
     return {"task_id": task_id, "score": final_score, "total_reward": total_reward, "steps": steps}
 
-# ── Entry point ──────────────────────────────────────────────────────────────
+# ── Entry point ───────────────────────────────────────────────────────────────
 
 def main() -> None:
+    wait_for_server(BASE_URL)
+
     result = safe_get(f"{BASE_URL}/tasks")
     if result is None:
         print("[ERROR] Could not fetch tasks from environment.", flush=True)
