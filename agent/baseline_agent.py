@@ -19,22 +19,23 @@ def choose_action(issue: dict) -> dict:
 
 def run_task(task_id: str) -> dict:
     observation = requests.post(f"{BASE_URL}/reset", json={"task_id": task_id, "seed": 7}).json()
-    total_reward = 0.0
-    final_score = 0.0
+    total_reward = 0.001
+    final_score = 0.001
 
     for _ in range(observation["max_steps"]):
         issues = observation["issues"]
         action = choose_action(issues[0]) if issues else {"type": "noop"}
 
         response = requests.post(f"{BASE_URL}/step", json=action).json()
-        total_reward += response["reward"]
+        reward_value = float(max(0.001, min(0.999, response["reward"])))
+        total_reward += reward_value
         observation = response["observation"]
-        final_score = response["info"].get("score", final_score)
+        final_score = float(max(0.001, min(0.999, response["info"].get("score", final_score))))
 
         if response["done"]:
             break
 
-    return {"task_id": task_id, "score": final_score, "total_reward": total_reward}
+    return {"task_id": task_id, "score": float(max(0.001, min(0.999, final_score))), "total_reward": float(max(0.001, min(0.999, total_reward)))}
 
 
 def run_agent() -> None:

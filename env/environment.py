@@ -58,10 +58,10 @@ class CSVEnvironment:
 
         progress = max(0.0, after_score - before_score)
         penalty = 0.1 if not valid_action else 0.0
-        reward_value = float(max(0.001, min(0.999, progress - penalty)))
+        reward_value = float(max(0.001, min(0.998, progress - penalty)))
 
         self.step_count += 1
-        self.done = after_score >= 0.999 or self.step_count >= self.task.max_steps
+        self.done = after_score >= 0.998 or self.step_count >= self.task.max_steps
 
         reward_detail = Reward(value=reward_value, components={"progress": progress, "penalty": penalty})
         info = {
@@ -104,11 +104,11 @@ class CSVEnvironment:
 
     def _grade(self) -> float:
         if self._baseline_issue_count <= 0:
-            return 0.999
+            return 0.998
 
         remaining = self._count_issues()
         score = 1.0 - (remaining / float(self._baseline_issue_count))
-        return float(max(0.001, min(0.999, score)))
+        return float(max(0.001, min(0.998, score)))
 
     def detect_issues(self) -> list:
         issues = []

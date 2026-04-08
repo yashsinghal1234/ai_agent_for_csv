@@ -96,13 +96,13 @@ def run_task(task_id: str, client: OpenAI = None) -> Dict:
     observation = safe_post(f"{BASE_URL}/reset", {"task_id": task_id, "seed": SEED})
     if observation is None:
         print(f"[ERROR] /reset failed for task {task_id}", flush=True)
-        return {"task_id": task_id, "score": 0.0, "total_reward": 0.0, "steps": 0}
+        return {"task_id": task_id, "score": 0.001, "total_reward": 0.001, "steps": 0}
 
     episode_id = f"{task_id}-{SEED}"
     log_event("START", {"task_id": task_id, "episode_id": episode_id, "seed": SEED})
 
-    total_reward = 0.0
-    final_score = 0.0
+    total_reward = 0.001
+    final_score = 0.001
     steps = 0
 
     for step in range(observation.get("max_steps", 10)):
@@ -119,9 +119,9 @@ def run_task(task_id: str, client: OpenAI = None) -> Dict:
             if response is None:
                 break
 
-        reward_value = response.get("reward", 0.0)
-        total_reward += reward_value
-        final_score = response.get("info", {}).get("score", final_score)
+        reward_value = float(max(0.001, min(0.998, response.get("reward", 0.001))))
+        total_reward = float(max(0.001, min(0.999, total_reward + reward_value)))
+        final_score = float(max(0.001, min(0.998, response.get("info", {}).get("score", final_score))))
         steps = step + 1
 
         log_event("STEP", {
@@ -138,15 +138,18 @@ def run_task(task_id: str, client: OpenAI = None) -> Dict:
         if response.get("done", False):
             break
 
+    clamped_score = float(max(0.001, min(0.998, final_score)))
+    clamped_reward = float(max(0.001, min(0.998, total_reward)))
+
     log_event("END", {
         "task_id": task_id,
         "episode_id": episode_id,
         "steps": steps,
-        "total_reward": total_reward,
-        "final_score": final_score,
+        "total_reward": clamped_reward,
+        "final_score": clamped_score,
     })
 
-    return {"task_id": task_id, "score": final_score, "total_reward": total_reward, "steps": steps}
+    return {"task_id": task_id, "score": clamped_score, "total_reward": clamped_reward, "steps": steps}
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 

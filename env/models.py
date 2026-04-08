@@ -26,13 +26,13 @@ class Action(BaseModel):
 
 
 class Reward(BaseModel):
-    value: float = Field(ge=0.0, le=1.0)
+    value: float = Field(gt=0.0, lt=1.0)
     components: Dict[str, float] = Field(default_factory=dict)
 
 
 class StepResult(BaseModel):
     observation: Observation
-    reward: float = Field(ge=0.0, le=1.0)
+    reward: float = Field(gt=0.0, lt=1.0)
     done: bool
     info: Dict[str, Any]
 
