@@ -13,6 +13,41 @@ A real-world OpenEnv environment that simulates data cleaning on messy CSV files
 
 ## What this environment models
 
+This project packages a small but realistic CSV-cleaning workflow. Each episode exposes a table with inconsistent dates, messy category labels, and occasional outliers. The agent improves the dataset by applying targeted cleaning actions until the task is solved or the step budget runs out.
+
+The repository includes:
+
+- a FastAPI/OpenEnv service in `api/`
+- a baseline agent in `agent/`
+- an inference entry point in `inference.py`
+- task metadata in `openenv.yaml`
+- sample data and helper assets under `data/` and `CSV_Cleaning_OpenEnv/`
+
+## Contributors
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/yashsinghal1234">
+        <img src="https://github.com/yashsinghal1234.png?size=160" width="120" height="120" alt="yashsinghal1234" />
+      </a>
+      <br />
+      <strong>yashsinghal1234</strong>
+      <br />
+      Owner
+    </td>
+    <td align="center">
+      <a href="https://github.com/Amit1557">
+        <img src="https://github.com/Amit1557.png?size=160" width="120" height="120" alt="Amit1557" />
+      </a>
+      <br />
+      <strong>Amit1557</strong>
+      <br />
+      Collaborator
+    </td>
+  </tr>
+</table>
+
 
 ## OpenEnv compliance
 ---
@@ -59,6 +94,14 @@ Each task has a deterministic grader that scores progress in the range 0.0–1.0
 pip install -r requirements.txt
 uvicorn api.main:app --host 0.0.0.0 --port 7860
 ```
+
+## Repository layout
+
+- `api/`: OpenEnv-compatible API server
+- `agent/`: baseline policy and helper logic
+- `inference.py`: script for running the inference loop
+- `data/`: local datasets and fixtures
+- `CSV_Cleaning_OpenEnv/`: task assets used by the environment
 
 ### Environment variables
 
