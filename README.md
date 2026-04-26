@@ -1,8 +1,11 @@
 ---
+# Hugging Face Spaces metadata for deployment and card display.
 title: CSV Cleaning OpenEnv
 emoji: "🧹"
+# Colors used by the Space card.
 colorFrom: blue
 colorTo: green
+# Docker image entrypoint for the app.
 sdk: docker
 app_file: api/main.py
 pinned: false
@@ -11,9 +14,22 @@ pinned: false
 
 A real-world OpenEnv environment that simulates data cleaning on messy CSV files. Agents must fix dates, normalize categorical labels, and remove numeric outliers via the standard `reset()`, `step()`, and `state()` API.
 
+<p align="center">
+  <img src="https://img.shields.io/badge/OpenEnv-ready-0ea5e9?style=for-the-badge" alt="OpenEnv ready badge" />
+  <img src="https://img.shields.io/badge/Docker-supported-2496ed?style=for-the-badge" alt="Docker supported badge" />
+  <img src="https://img.shields.io/badge/CSV%20Cleaning-automation-16a34a?style=for-the-badge" alt="CSV cleaning badge" />
+</p>
+
 ## What this environment models
 
 This project packages a small but realistic CSV-cleaning workflow. Each episode exposes a table with inconsistent dates, messy category labels, and occasional outliers. The agent improves the dataset by applying targeted cleaning actions until the task is solved or the step budget runs out.
+
+## Highlights
+
+- deterministic task scoring for repeatable experiments
+- clean OpenEnv-style `reset`, `step`, and `state` interactions
+- baseline policy and inference entry point included
+- Docker-ready deployment for Hugging Face Spaces or local runs
 
 The repository includes:
 
@@ -95,6 +111,13 @@ pip install -r requirements.txt
 uvicorn api.main:app --host 0.0.0.0 --port 7860
 ```
 
+## Quick start
+
+1. Install dependencies with `pip install -r requirements.txt`.
+2. Launch the API with `uvicorn api.main:app --host 0.0.0.0 --port 7860`.
+3. Run `python agent/baseline_agent.py` to see the baseline cleaner in action.
+4. Run `python inference.py` to try the scripted inference loop.
+
 ## Repository layout
 
 - `api/`: OpenEnv-compatible API server
@@ -136,6 +159,17 @@ python inference.py
 ```
 
 This emits structured logs with `[START]`, `[STEP]`, and `[END]` tokens. Set `USE_LLM=1` to use the LLM policy.
+
+## What makes it useful
+
+The project is designed as a small sandbox for agent evaluation and CSV cleanup workflows. It can be extended with new tasks, custom reward logic, additional cleaning actions, or alternative agent policies without changing the core API shape.
+
+Possible next additions:
+
+- a web UI for previewing dataset fixes
+- richer validation and scoring rules
+- more task variants with different difficulty levels
+- downloadable cleaned CSV outputs
 
 ## Docker
 
